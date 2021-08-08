@@ -28,15 +28,12 @@ from scipy.cluster.hierarchy import fcluster
 import scipy.sparse as sp
 from scipy.sparse import csr_matrix
 import sklearn.metrics
-# import pdb; pdb.set_trace()
-
-## ? for running on HPC
-import warnings
-warnings.filterwarnings("ignore")
-
 import pandas as pd
 import sys
 sys.path.insert(0, 'lib/')
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 if torch.cuda.is_available():
@@ -50,7 +47,6 @@ else:
     dtypeLong = torch.LongTensor
     torch.manual_seed(1)
 
-# from grid_graph import grid_graph
 from coarsening import coarsen, laplacian
 from coarsening import lmax_L
 from coarsening import perm_data
@@ -60,9 +56,8 @@ import utilsdata
 from utilsdata import *
 import warnings
 warnings.filterwarnings("ignore")
-#
-#
-# Directories.
+
+## Set up the arguments.
 parser = argparse.ArgumentParser()
 parser.add_argument('--user', type=str, default='personal', help="personal or hpc")
 parser.add_argument('--lr', type=float, default = 0.01, help='learning rate.')
@@ -82,7 +77,6 @@ t_start = time.process_time()
 
 
 # Load data
-
 generateTrainTest = 1
     
 print('load data...')
@@ -160,10 +154,6 @@ if generateTrainTest:
     
     nclass = len(np.unique(labels))
     
-
-
-
-        
         
 L = [laplacian(adj, normalized=True)]
 
@@ -173,7 +163,6 @@ train_data = torch.FloatTensor(train_data)
 train_labels = torch.LongTensor(train_labels)
 test_data = torch.FloatTensor(test_data)
 test_labels = torch.LongTensor(test_labels)
-#adj_for_loss = torch.FloatTensor(adj_for_loss)
 
 dset_train = Data.TensorDataset(train_data, train_labels)
 train_loader = Data.DataLoader(dset_train, batch_size = args.batchsize, shuffle = True)
@@ -279,9 +268,7 @@ for epoch in range(num_epochs):  # loop over the dataset multiple times
         batch_x, batch_y = batch_x.to(device), batch_y.to(device)
                 
         optimizer.zero_grad()
-        # print(L)
         out_gae, out_hidden, output, out_adj = net(batch_x, dropout_value, L)
-        # print(output)
         
         loss_batch = net.loss(out_gae, batch_x, output, batch_y, l2_regularization)
         acc_batch = utilsdata.accuracy(output, batch_y).item()
@@ -354,11 +341,6 @@ t_stop_test = time.time() - t_start_test
 print('  accuracy(test) = %.3f %%, time= %.3f' % (test_acc, t_stop_test))
 
 ## compute classification metrics
-# print(test_labels)
-# print(type(test_labels))
-# print(predictions)
-# print(type(test_labels))
-# breakpoint()
 classification_report = sklearn.metrics.classification_report(test_labels, preds_labels, labels=range(nclass))
 print(classification_report)
 
