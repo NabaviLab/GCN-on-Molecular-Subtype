@@ -65,30 +65,19 @@ warnings.filterwarnings("ignore")
 # Directories.
 parser = argparse.ArgumentParser()
 parser.add_argument('--user', type=str, default='personal', help="personal or hpc")
-parser.add_argument('--dir_data', type = str, default = os.path.join('..', 'data', 'cancer'), help = 'Directory to store data.')
-# Graphs.
-parser.add_argument('--numner_edges', type = int, default = 8, help = 'Graph: minimum number of edges per vertex.')
-parser.add_argument('--metric', type=str, default = 'euclidean', help='Graph: similarity measure (between features).')
-# TODO: change cgcnn for combinatorial Laplacians.
-parser.add_argument('--normalized_laplacian', type=bool, default = True, help='Graph Laplacian: normalized.')
-parser.add_argument('--coarsening_levels', type=int, default = 4, help='Number of coarsened graphs.')
 parser.add_argument('--lr', type=float, default = 0.01, help='learning rate.')
 parser.add_argument('--num_gene', type=int, default = 1000, help='# of genes')
+parser.add_argument('--num_omic', type=int, default = 2, help='# of omics')
 parser.add_argument('--epochs', type=int, default = 30, help='# of epoch')
 parser.add_argument('--batchsize', type=int, default = 64, help='# of genes')
 parser.add_argument('--database', type=str, default='biogrid', choices=['biogrid', 'string', 'coexpression'],help="netWork")
 parser.add_argument('--singleton', type=bool, default=True, help="include Singleton")
 parser.add_argument('--savemodel', type=int, default = 0, help='if save the model')
-
 parser.add_argument('--loaddata', type=bool, default=False, help="if load the org data")
-parser.add_argument('--thres', type=float, default = 0.1, help='# of epoch')
-parser.add_argument('--dist', type=str, default='', help="dist type")
-parser.add_argument('--sampling_rate', type=float, default = 1, help='# sampling rate of cells')
 
 args = parser.parse_args()
-#['Xin','BaronHuman','Muraro','Segerstolpe', 'BaronMouse']
 
-# # Feature graph
+# Start the timer
 t_start = time.process_time()
 
 
@@ -101,7 +90,6 @@ print('load data...')
 expression_data_path = 'data/common_expression_data.tsv'
 cnv_data_path = 'data/common_cnv_data.tsv'
 expression_variance_file = 'data/expression_variance.tsv'
-## all shuffle index will have the same effect, max5000 is used here as an example
 shuffle_index_path = 'data/common_shuffle_index.tsv'
 if args.database == 'biogrid':
     adjacency_matrix_file = 'data/adj_matrix_biogrid.npz'
@@ -114,9 +102,20 @@ elif args.database == 'coexpression':
     non_null_index_path = 'data/coexpression_non_null.csv'
 
 if args.loaddata:
-    expr_all_data, cnv_all_data = load_multiomics_data(expression_data_path, cnv_data_path)
+    if args.num_omic == 1:
+        expr_all_data = load_singleomic_data(expression_data_path)
 
-adj, train_data_all, labels, shuffle_index = utilsdata.downSampling_multiomics_data(expression_variance_path=expression_variance_file,
+        adj, train_data_all, labels, shuffle_index = utilsdata.downSampling_singleomics_data(expression_variance_path=expression_variance_file,
+                                                                            expression_data=expr_all_data,
+                                                                            non_null_index_path=non_null_index_path,
+                                                                            shuffle_index_path=shuffle_index_path,
+                                                                            adjacency_matrix_path=adjacency_matrix_file,
+                                                                            number_gene=args.num_gene,
+                                                                            singleton=args.singleton)
+    elif atgs.num_omic == 2:
+        expr_all_data, cnv_all_data = load_multiomics_data(expression_data_path, cnv_data_path)
+
+        adj, train_data_all, labels, shuffle_index = utilsdata.downSampling_multiomics_data(expression_variance_path=expression_variance_file,
                                                                       expression_data=expr_all_data,
                                                                       cnv_data=cnv_all_data,
                                                                       non_null_index_path=non_null_index_path,
@@ -124,6 +123,7 @@ adj, train_data_all, labels, shuffle_index = utilsdata.downSampling_multiomics_d
                                                                       adjacency_matrix_path=adjacency_matrix_file,
                                                                       number_gene=args.num_gene,
                                                                       singleton=False)
+                                                                      
 from sklearn import preprocessing
 le = preprocessing.LabelEncoder()
 labels = le.fit_transform(labels)  
@@ -386,7 +386,6 @@ testPreds4save = pd.DataFrame(preds_labels,columns=['predLabels'])
 testPreds4save.insert(0, 'trueLabels', list(predictions.iloc[:,0]))
 aa = np.exp(np.asarray(predictions.iloc[:,1:]))
 confusionGCN = pd.DataFrame(confusionGCN)
-totlePath = '/Users/tianyu/Desktop/scRNAseq_Benchmark_datasets/Intra-dataset'
 
 
 if args.savemodel:
