@@ -3,6 +3,7 @@
 """
 Created on Mon Jan 13 21:15:43 2020
 
+@author: bingjun
 @author: tianyu
 """
 import torch
@@ -267,13 +268,7 @@ class Graph_GCN(nn.Module):
         x_nn = self.nn_fc1(x_nn) # B x V
         x_nn = F.relu(x_nn)
         x_nn = self.nn_fc2(x_nn)
-        x_nn = F.relu(x_nn)
-
-#        x_hidden_ae = x_nn
-#        x_decode_ae = self.nn_fc3(x_hidden_ae)
-#        x_decode_ae = F.relu(x_decode_ae)
-#        x_decode_ae = self.nn_fc4(x_hidden_ae)
-#        x_decode_ae = F.relu(x_decode_ae)       
+        x_nn = F.relu(x_nn)  
 
         # concatenate layer 
 
@@ -285,19 +280,9 @@ class Graph_GCN(nn.Module):
 
 
     def loss(self, y1, y_target1,y2, y_target2,l2_regularization):
-        #print(y1.size(), y_target1.size(), y2.size(), y_target2.size())
-        #print(torch.max(y2), torch.max(y_target2))
-        
-        # print(y1.shape)
-        # print(y_target1.shape)
         y_target1 = y_target1.view(y_target1.size()[0], -1)
         
         loss1 = nn.MSELoss()(y1, y_target1)
-        #print(y2)
-        # y2 = torch.max(y2,1)[1]
-        # print(y2.shape)
-        # print(y_target2)
-        # loss2 = nn.NLLLoss()(y2, y_target2)
         loss2 = nn.CrossEntropyLoss()(y2, y_target2)           
         loss = 1 * loss1 + 1 * loss2 
         

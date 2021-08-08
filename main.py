@@ -123,7 +123,7 @@ if args.loaddata:
                                                                       adjacency_matrix_path=adjacency_matrix_file,
                                                                       number_gene=args.num_gene,
                                                                       singleton=False)
-                                                                      
+
 from sklearn import preprocessing
 le = preprocessing.LabelEncoder()
 labels = le.fit_transform(labels)  
@@ -135,15 +135,6 @@ if args.singleton:
     adj = adj + sp.eye(adj.shape[0])
 else:
     adj, train_data_all = removeZeroAdj(adj, train_data_all) 
-# print(features.shape)
-# features = np.log1p(alldata)
-# maxscale = np.max(features) 
-# print('maxscale:',maxscale)
-# features = features/np.max(features)    
-# features, geneind = utilsdata.high_var_npdata(features, num= args.num_gene, ind=1)
-
-# adj = adjall[geneind,:][:,geneind]
-# adj = adj + sp.eye(adj.shape[0])
 
 
 print('load done.')
@@ -156,21 +147,11 @@ print('******************************',adj.shape, train_data_all.shape)
 
 if generateTrainTest:
     shuffle_index = shuffle_index.astype(np.int32).reshape(-1)
-    #shuffle_index = [item for sublist in shuffle_index for item in sublist]
-    # print(type(labels))
-    # print(type(shuffle_index))
-    # print(type(features))
 
     train_size, val_size = int(len(shuffle_index)* 0.8), int(len(shuffle_index)* 0.9)
-    # print(train_size)
-    # print(val_size)
     train_data = np.asarray(train_data_all).astype(np.float32)[shuffle_index[0:train_size]]
-    # print(train_data.shape)
     val_data = np.asarray(train_data_all).astype(np.float32)[shuffle_index[train_size:val_size]]
-    # print(val_data.shape)
     test_data = np.asarray(train_data_all).astype(np.float32)[shuffle_index[val_size:]]
-    # print(test_data.shape)
-    # print(shuffle_index[0:train_size])
     train_labels = labels[np.array(shuffle_index[0:train_size])]
     val_labels = labels[shuffle_index[train_size:val_size]]
     test_labels = labels[shuffle_index[val_size:]]
@@ -178,7 +159,6 @@ if generateTrainTest:
     ll, cnt = np.unique(train_labels,return_counts=True)
     
     nclass = len(np.unique(labels))
-    # print(nclass)
     
 
 
