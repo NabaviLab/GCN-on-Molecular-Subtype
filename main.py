@@ -106,7 +106,7 @@ if args.loaddata:
                                                                             adjacency_matrix_path=adjacency_matrix_file,
                                                                             number_gene=args.num_gene,
                                                                             singleton=args.singleton)
-    elif atgs.num_omic == 2:
+    elif args.num_omic == 2:
         expr_all_data, cnv_all_data = load_multiomics_data(expression_data_path, cnv_data_path)
 
         adj, train_data_all, labels, shuffle_index = utilsdata.downSampling_multiomics_data(expression_variance_path=expression_variance_file,

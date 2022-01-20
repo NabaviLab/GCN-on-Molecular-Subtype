@@ -29,6 +29,15 @@ def encode_onehot(labels):
                              dtype=np.int32)
     return labels_onehot
 
+def sparse_mx_to_torch_sparse_tensor(sparse_mx):
+    """Convert a scipy sparse matrix to a torch sparse tensor."""
+    sparse_mx = sparse_mx.tocoo().astype(np.float32)
+    indices = torch.from_numpy(
+        np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64))
+    values = torch.from_numpy(sparse_mx.data)
+    shape = torch.Size(sparse_mx.shape)
+    return torch.sparse.FloatTensor(indices, values, shape)
+
 def high_variance_expression_gene(expression_variance_path, non_null_path, num_gene, singleton=False):
     gene_variance = pd.read_csv(expression_variance_path, sep='\t', index_col=0, header=0)
     if singleton:
