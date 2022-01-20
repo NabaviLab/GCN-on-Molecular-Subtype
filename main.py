@@ -181,7 +181,7 @@ except NameError:
 
 
 # network parameters
-F_0 = 2
+F_0 = args.num_of_omics
 D_g = train_data.shape[1] # features(genes)
 CL1_F = 5
 CL1_K = 5
