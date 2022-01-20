@@ -21,6 +21,12 @@ import os
 from sklearn import preprocessing
 from sklearn import linear_model
 
+def accuracy(output, labels): # average of each batch 
+    preds = output.max(1)[1].type_as(labels)
+    correct = preds.eq(labels).double()
+    correct = correct.sum()
+    return correct / len(labels)
+    
 def encode_onehot(labels):
     classes = set(labels)
     classes_dict = {c: np.identity(len(classes))[i, :] for i, c in
